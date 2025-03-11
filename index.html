@@ -12,25 +12,27 @@
     .container { width: 80%; margin: auto; text-align: center; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    input, select { width: 100%; border: none; text-align: center; }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Administración de Pedidos</h2>
-    <input type="text" id="semana" placeholder="Semana">
-    <input type="text" id="nombreApellido" placeholder="Nombre y Apellido" required>
-    <input type="text" id="tipoEvento" placeholder="Tipo de Evento">
-    <input type="date" id="fechaAtencion">
-    <input type="text" id="redSocial" placeholder="Red Social">
-    <input type="date" id="fechaEvento">
+    <label>Semana:</label><input type="text" id="semana" placeholder="Semana">
+    <label>Nombre y Apellido:</label><input type="text" id="nombreApellido" required>
+    <label>Tipo de Evento:</label><input type="text" id="tipoEvento">
+    <label>Fecha de Atención:</label><input type="date" id="fechaAtencion" required>
+    <label>Red Social:</label><input type="text" id="redSocial">
+    <label>Fecha de Evento:</label><input type="date" id="fechaEvento">
+    <label>Status:</label>
     <select id="status">
       <option value="Por coordinar">Por coordinar</option>
       <option value="Confirmado">Confirmado</option>
       <option value="Cancelado">Cancelado</option>
     </select>
-    <input type="text" id="cotizacion" placeholder="Cotización">
-    <input type="text" id="montoTicket" placeholder="Monto del Ticket">
-    <input type="text" id="observaciones" placeholder="Observaciones" required>
+    <label>Cotización:</label><input type="text" id="cotizacion">
+    <label>Monto del Ticket:</label><input type="text" id="montoTicket">
+    <label>Observaciones:</label><input type="text" id="observaciones" required>
     <button onclick="addPedido()">Agregar Pedido</button>
     <button onclick="handleSignOut()">Cerrar Sesión</button>
     
@@ -118,7 +120,23 @@
         const order = doc.data();
         tbody.innerHTML += `
           <tr id="row-${doc.id}">
-            ${Object.keys(order).map(field => `<td><span id="${field}-${doc.id}">${order[field]}</span><input type="text" value="${order[field]}" id="edit-${field}-${doc.id}" style="display:none"></td>`).join('')}
+            <td><span id="semana-${doc.id}">${order.semana}</span><input type="text" value="${order.semana}" id="edit-semana-${doc.id}" style="display:none"></td>
+            <td><span id="nombreApellido-${doc.id}">${order.nombreApellido}</span><input type="text" value="${order.nombreApellido}" id="edit-nombreApellido-${doc.id}" style="display:none"></td>
+            <td><span id="tipoEvento-${doc.id}">${order.tipoEvento}</span><input type="text" value="${order.tipoEvento}" id="edit-tipoEvento-${doc.id}" style="display:none"></td>
+            <td><span id="fechaAtencion-${doc.id}">${order.fechaAtencion}</span><input type="date" value="${order.fechaAtencion}" id="edit-fechaAtencion-${doc.id}" style="display:none"></td>
+            <td><span id="redSocial-${doc.id}">${order.redSocial}</span><input type="text" value="${order.redSocial}" id="edit-redSocial-${doc.id}" style="display:none"></td>
+            <td><span id="fechaEvento-${doc.id}">${order.fechaEvento}</span><input type="date" value="${order.fechaEvento}" id="edit-fechaEvento-${doc.id}" style="display:none"></td>
+            <td>
+              <span id="status-${doc.id}">${order.status}</span>
+              <select id="edit-status-${doc.id}" style="display:none">
+                <option value="Por coordinar">Por coordinar</option>
+                <option value="Confirmado">Confirmado</option>
+                <option value="Cancelado">Cancelado</option>
+              </select>
+            </td>
+            <td><span id="cotizacion-${doc.id}">${order.cotizacion}</span><input type="text" value="${order.cotizacion}" id="edit-cotizacion-${doc.id}" style="display:none"></td>
+            <td><span id="montoTicket-${doc.id}">${order.montoTicket}</span><input type="text" value="${order.montoTicket}" id="edit-montoTicket-${doc.id}" style="display:none"></td>
+            <td><span id="observaciones-${doc.id}">${order.observaciones}</span><input type="text" value="${order.observaciones}" id="edit-observaciones-${doc.id}" style="display:none"></td>
             <td>
               <button onclick="enableEdit('${doc.id}')">Editar</button>
               <button onclick="deletePedido('${doc.id}')">Eliminar</button>
@@ -152,6 +170,11 @@
       loadPedidos();
     }
     window.onload = loadPedidos;
+  </script>
+</body>
+</html>
+
+    
   </script>
 </body>
 </html>
