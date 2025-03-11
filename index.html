@@ -87,9 +87,10 @@
 
     async function addPedido() {
       const nombreApellido = document.getElementById("nombreApellido").value.trim();
+      const fechaAtencion = document.getElementById("fechaAtencion").value.trim();
       const observaciones = document.getElementById("observaciones").value.trim();
-      if (!nombreApellido || !observaciones) {
-        alert("Nombre y Apellido y Observaciones son obligatorios.");
+      if (!nombreApellido || !fechaAtencion || !observaciones) {
+        alert("Nombre y Apellido, Fecha de Atención y Observaciones son obligatorios.");
         return;
       }
       
@@ -97,7 +98,7 @@
         semana: document.getElementById("semana").value || "Por coordinar",
         nombreApellido,
         tipoEvento: document.getElementById("tipoEvento").value || "Por coordinar",
-        fechaAtencion: document.getElementById("fechaAtencion").value || "Por coordinar",
+        fechaAtencion,
         redSocial: document.getElementById("redSocial").value || "Por coordinar",
         fechaEvento: document.getElementById("fechaEvento").value || "Por coordinar",
         status: document.getElementById("status").value,
@@ -106,6 +107,31 @@
         observaciones
       };
       await db.collection("orders").add(newOrder);
+      loadPedidos();
+    }
+    
+    async function loadPedidos() {
+      const querySnapshot = await db.collection("orders").get();
+      const tbody = document.getElementById("pedidosTabla");
+      tbody.innerHTML = "";
+      querySnapshot.forEach(doc => {
+        const order = doc.data();
+        tbody.innerHTML += `
+          <tr id="row-${doc.id}">
+            ${Object.keys(order).map(field => `<td><input type="text" value="${order[field]}" id="${field}-${doc.id}"></td>`).join('')}
+            <td>
+              <button onclick="saveEdit('${doc.id}')">Guardar</button>
+              <button onclick="deletePedido('${doc.id}')">Eliminar</button>
+            </td>
+          </tr>`;
+      });
+    }
+    async function saveEdit(id) {
+      const updatedData = {};
+      document.querySelectorAll(`#row-${id} input`).forEach(input => {
+        updatedData[input.id.split('-')[0]] = input.value;
+      });
+      await db.collection("orders").doc(id).update(updatedData);
       loadPedidos();
     }
     
