@@ -164,6 +164,14 @@ function handleClientLoad() {
         alert("Error de conexión al subir el archivo.");
       }
     }
+    
+    window.onload = () => {
+  if (typeof gapi !== "undefined") {
+    handleClientLoad();
+  } else {
+    console.error("Google API no se cargó correctamente.");
+  }
+};
 
     //fin de file update
     
