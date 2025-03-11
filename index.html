@@ -32,6 +32,7 @@
     <input type="text" id="montoTicket" placeholder="Monto del Ticket">
     <input type="text" id="observaciones" placeholder="Observaciones" required>
     <button onclick="addPedido()">Agregar Pedido</button>
+    <button onclick="handleSignOut()">Cerrar Sesión</button>
     
     <table>
       <thead>
@@ -56,23 +57,22 @@
     
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const auth = firebase.auth();
 
-
-    onAuthStateChanged(auth, (user) => {
+    auth.onAuthStateChanged(user => {
       if (!user) {
         window.location.href = "login.html";
       }
     });
 
     const handleSignOut = () => {
-      signOut(auth).then(() => {
+      auth.signOut().then(() => {
         window.location.href = "/IMEKA/login.html";
       }).catch(error => {
         console.error("Error al cerrar sesión:", error);
       });
     };
 
-    // Detectar inactividad
     let inactivityTimeout;
     const resetInactivityTimer = () => {
       clearTimeout(inactivityTimeout);
@@ -85,7 +85,6 @@
     document.addEventListener("click", resetInactivityTimer);
     resetInactivityTimer();
 
-    
     async function addPedido() {
       const nombreApellido = document.getElementById("nombreApellido").value.trim();
       const observaciones = document.getElementById("observaciones").value.trim();
