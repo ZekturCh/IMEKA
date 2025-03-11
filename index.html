@@ -110,7 +110,7 @@
       loadPedidos();
     }
     
-    async function loadPedidos() {
+   async function loadPedidos() {
       const querySnapshot = await db.collection("orders").get();
       const tbody = document.getElementById("pedidosTabla");
       tbody.innerHTML = "";
@@ -118,47 +118,34 @@
         const order = doc.data();
         tbody.innerHTML += `
           <tr id="row-${doc.id}">
-            ${Object.keys(order).map(field => `<td><input type="text" value="${order[field]}" id="${field}-${doc.id}"></td>`).join('')}
+            ${Object.keys(order).map(field => `<td><span id="${field}-${doc.id}">${order[field]}</span><input type="text" value="${order[field]}" id="edit-${field}-${doc.id}" style="display:none"></td>`).join('')}
             <td>
-              <button onclick="saveEdit('${doc.id}')">Guardar</button>
+              <button onclick="enableEdit('${doc.id}')">Editar</button>
               <button onclick="deletePedido('${doc.id}')">Eliminar</button>
+              <button onclick="saveEdit('${doc.id}')" style="display:none">Guardar</button>
+              <button onclick="cancelEdit('${doc.id}')" style="display:none">Cancelar</button>
             </td>
           </tr>`;
       });
     }
+    function enableEdit(id) {
+      document.querySelectorAll(`#row-${id} span`).forEach(span => span.style.display = 'none');
+      document.querySelectorAll(`#row-${id} input`).forEach(input => input.style.display = 'block');
+      document.querySelector(`#row-${id} button[onclick="enableEdit('${id}')"]`).style.display = 'none';
+      document.querySelector(`#row-${id} button[onclick="deletePedido('${id}')"]`).style.display = 'none';
+      document.querySelector(`#row-${id} button[onclick="saveEdit('${id}')"]`).style.display = 'inline';
+      document.querySelector(`#row-${id} button[onclick="cancelEdit('${id}')"]`).style.display = 'inline';
+    }
     async function saveEdit(id) {
       const updatedData = {};
       document.querySelectorAll(`#row-${id} input`).forEach(input => {
-        updatedData[input.id.split('-')[0]] = input.value;
+        updatedData[input.id.split('-')[1]] = input.value;
       });
       await db.collection("orders").doc(id).update(updatedData);
       loadPedidos();
     }
-    
-    async function loadPedidos() {
-      const querySnapshot = await db.collection("orders").get();
-      const tbody = document.getElementById("pedidosTabla");
-      tbody.innerHTML = "";
-      querySnapshot.forEach(doc => {
-        const order = doc.data();
-        tbody.innerHTML += `
-          <tr>
-            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'semana', this.innerText)">${order.semana}</td>
-            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'nombreApellido', this.innerText)">${order.nombreApellido}</td>
-            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'tipoEvento', this.innerText)">${order.tipoEvento}</td>
-            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'fechaAtencion', this.innerText)">${order.fechaAtencion}</td>
-            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'redSocial', this.innerText)">${order.redSocial}</td>
-            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'fechaEvento', this.innerText)">${order.fechaEvento}</td>
-            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'status', this.innerText)">${order.status}</td>
-            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'cotizacion', this.innerText)">${order.cotizacion}</td>
-            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'montoTicket', this.innerText)">${order.montoTicket}</td>
-            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'observaciones', this.innerText)">${order.observaciones}</td>
-            <td><button onclick="deletePedido('${doc.id}')">Eliminar</button></td>
-          </tr>`;
-      });
-    }
-    async function updatePedido(id, field, value) {
-      await db.collection("orders").doc(id).update({ [field]: value });
+    function cancelEdit(id) {
+      loadPedidos();
     }
     async function deletePedido(id) {
       await db.collection("orders").doc(id).delete();
