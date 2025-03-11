@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administración de Pedidos</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .container { width: 80%; margin: auto; text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Administración de Pedidos</h2>
+    <input type="date" id="fecha" value="">
+    <input type="text" id="nombre" placeholder="Nombre">
+    <input type="text" id="telefono" placeholder="Teléfono">
+    <input type="number" id="cantidad" placeholder="Cantidad de invitados">
+    <select id="tipoEvento">
+      <option value="Concierto">Concierto</option>
+      <option value="Boda">Boda</option>
+      <option value="Conferencia">Conferencia</option>
+    </select>
+    <input type="text" id="estiloEvento" placeholder="Estilo de evento">
+    <input type="text" id="comentarios" placeholder="Comentarios">
+    <input type="date" id="fechaEvento">
+    <button onclick="addPedido()">Agregar Pedido</button>
+    <button onclick="handleSignOut()">Cerrar Sesión</button>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th><th>Nombre</th><th>Teléfono</th><th>Invitados</th>
+          <th>Tipo Evento</th><th>Estilo</th><th>Comentarios</th><th>Fecha Evento</th>
+          <th>Subir Archivo</th><th>Descarga</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="pedidosTabla"></tbody>
+    </table>
+  </div>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAkWPKlXPf-1PoCOPr-WxEeei04JmOYo1w",
+      authDomain: "elixir-a7fe8.firebaseapp.com",
+      projectId: "elixir-a7fe8",
+      storageBucket: "elixir-a7fe8.appspot.com",
+      messagingSenderId: "638327915376",
+      appId: "1:638327915376:web:094d13b75d5c94ac76c5b5"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      }
+    });
+
+    function handleSignOut() {
+      auth.signOut().then(() => {
+        window.location.href = "/IMEKA/login.html";
+      }).catch(error => {
+        console.error("Error al cerrar sesión:", error);
+      });
+    }
+
+    let inactivityTimeout;
+    function resetInactivityTimer() {
+      clearTimeout(inactivityTimeout);
+      inactivityTimeout = setTimeout(() => {
+        handleSignOut();
+      }, 5 * 60 * 1000);
+    }
+    document.addEventListener("mousemove", resetInactivityTimer);
+    document.addEventListener("keydown", resetInactivityTimer);
+    document.addEventListener("click", resetInactivityTimer);
+    resetInactivityTimer();
+    
+    async function addPedido() {
+      const fecha = document.getElementById("fecha").value;
+      const nombre = document.getElementById("nombre").value || "PorCoordinar";
+      const telefono = document.getElementById("telefono").value || "PorCoordinar";
+      const cantidad = document.getElementById("cantidad").value || "PorCoordinar";
+      const tipoEvento = document.getElementById("tipoEvento").value;
+      const estiloEvento = document.getElementById("estiloEvento").value || "PorCoordinar";
+      const comentarios = document.getElementById("comentarios").value || "PorCoordinar";
+      const fechaEvento = document.getElementById("fechaEvento").value || "PorCoordinar";
+      
+      const newOrder = {
+        fecha,
+        nombre,
+        telefono,
+        cantidad,
+        tipoEvento,
+        estiloEvento,
+        comentarios,
+        fechaEvento
+      };
+      await db.collection("orders").add(newOrder);
+      loadPedidos();
+    }
+    //file update
+ async function uploadFile(event, orderId) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const username = prompt("ZekturCh");
+      const password = prompt("Ch4v3z1!");
+      if (!username || !password) {
+        alert("Debe ingresar credenciales válidas.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = async function () {
+        const base64Content = reader.result.split(",")[1];
+        const fileName = `${orderId}_${file.name}`;
+        const url = `https://api.github.com/repos/ZekturCh/IMEKA/contents/${fileName}`;
+        const authHeader = "Basic " + btoa(`${username}:${password}`);
+
+        try {
+          const response = await fetch(url, {
+            method: "PUT",
+            headers: {
+              "Authorization": authHeader,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              message: `Subiendo archivo ${fileName}`,
+              content: base64Content,
+              branch: "gh-pages"
+            })
+          });
+          
+          const data = await response.json();
+          if (response.ok) {
+            const fileURL = data.content.html_url;
+            await db.collection("orders").doc(orderId).update({ fileURL });
+            document.getElementById(`fileLink-${orderId}`).innerHTML = `<a href="${fileURL}" target="_blank">Descargar</a>`;
+          } else {
+            console.error("Error al subir archivo a GitHub:", data);
+            alert("Error al subir archivo. Verifique sus credenciales y permisos.");
+          }
+        } catch (error) {
+          console.error("Error en la solicitud de subida a GitHub:", error);
+          alert("Error de conexión al subir el archivo.");
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    //fin de file update
+    
+    async function deletePedido(id) {
+      await db.collection("orders").doc(id).delete();
+      loadPedidos();
+    }
+    async function loadPedidos() {
+      const querySnapshot = await db.collection("orders").get();
+      const tbody = document.getElementById("pedidosTabla");
+      tbody.innerHTML = "";
+      querySnapshot.forEach(doc => {
+        const order = doc.data();
+        tbody.innerHTML += `
+          <tr>
+            <td>${order.fecha}</td><td>${order.nombre}</td><td>${order.telefono}</td><td>${order.cantidad}</td>
+            <td>${order.tipoEvento}</td><td>${order.estiloEvento}</td><td>${order.comentarios}</td><td>${order.fechaEvento}</td>
+            <td><input type="file" onchange="uploadFile(event, '${doc.id}')"></td>
+            <td id="fileLink-${doc.id}">${order.fileURL ? `<a href="${order.fileURL}" target="_blank">Descargar</a>` : "No disponible"}</td>
+            <td><button onclick="deletePedido('${doc.id}')">Eliminar</button></td>
+          </tr>
+        `;
+      });
+    }
+    window.onload = loadPedidos;
+  </script>
+</body>
+</html>
