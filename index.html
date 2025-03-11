@@ -117,24 +117,27 @@
         const order = doc.data();
         tbody.innerHTML += `
           <tr>
-            <td>${order.semana}</td><td>${order.nombreApellido}</td><td>${order.tipoEvento}</td>
-            <td>${order.fechaAtencion}</td><td>${order.redSocial}</td><td>${order.fechaEvento}</td>
-            <td>${order.status}</td><td>${order.cotizacion}</td><td>${order.montoTicket}</td>
-            <td>${order.observaciones}</td>
-            <td><button onclick="editPedido('${doc.id}')">Editar</button></td>
-          </tr>
-        `;
+            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'semana', this.innerText)">${order.semana}</td>
+            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'nombreApellido', this.innerText)">${order.nombreApellido}</td>
+            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'tipoEvento', this.innerText)">${order.tipoEvento}</td>
+            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'fechaAtencion', this.innerText)">${order.fechaAtencion}</td>
+            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'redSocial', this.innerText)">${order.redSocial}</td>
+            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'fechaEvento', this.innerText)">${order.fechaEvento}</td>
+            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'status', this.innerText)">${order.status}</td>
+            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'cotizacion', this.innerText)">${order.cotizacion}</td>
+            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'montoTicket', this.innerText)">${order.montoTicket}</td>
+            <td contenteditable="true" onBlur="updatePedido('${doc.id}', 'observaciones', this.innerText)">${order.observaciones}</td>
+            <td><button onclick="deletePedido('${doc.id}')">Eliminar</button></td>
+          </tr>`;
       });
     }
-    
-    async function editPedido(id) {
-      const newObservaciones = prompt("Editar observaciones:");
-      if (newObservaciones) {
-        await db.collection("orders").doc(id).update({ observaciones: newObservaciones });
-        loadPedidos();
-      }
+    async function updatePedido(id, field, value) {
+      await db.collection("orders").doc(id).update({ [field]: value });
     }
-    
+    async function deletePedido(id) {
+      await db.collection("orders").doc(id).delete();
+      loadPedidos();
+    }
     window.onload = loadPedidos;
   </script>
 </body>
