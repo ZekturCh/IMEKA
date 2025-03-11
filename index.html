@@ -149,13 +149,23 @@ body { font-family: Arial, sans-serif; }
       });
     }
     function enableEdit(id) {
-      document.querySelectorAll(`#row-${id} span`).forEach(span => span.style.display = 'none');
-      document.querySelectorAll(`#row-${id} input`).forEach(input => input.style.display = 'block');
-      document.querySelector(`#row-${id} button[onclick="enableEdit('${id}')"]`).style.display = 'none';
-      document.querySelector(`#row-${id} button[onclick="deletePedido('${id}')"]`).style.display = 'none';
-      document.querySelector(`#row-${id} button[onclick="saveEdit('${id}')"]`).style.display = 'inline';
-      document.querySelector(`#row-${id} button[onclick="cancelEdit('${id}')"]`).style.display = 'inline';
+  document.querySelectorAll(`#row-${id} span`).forEach(span => {
+    if (!span.classList.contains('status')) { // Excluir "status"
+      span.style.display = 'none';
     }
+  });
+
+  document.querySelectorAll(`#row-${id} input`).forEach(input => {
+    if (!input.classList.contains('status')) { // Excluir "status"
+      input.style.display = 'block';
+    }
+  });
+
+  document.querySelector(`#row-${id} button[onclick="enableEdit('${id}')"]`).style.display = 'none';
+  document.querySelector(`#row-${id} button[onclick="deletePedido('${id}')"]`).style.display = 'none';
+  document.querySelector(`#row-${id} button[onclick="saveEdit('${id}')"]`).style.display = 'inline';
+  document.querySelector(`#row-${id} button[onclick="cancelEdit('${id}')"]`).style.display = 'inline';
+}
     async function saveEdit(id) {
       const updatedData = {};
       document.querySelectorAll(`#row-${id} input`).forEach(input => {
