@@ -123,33 +123,31 @@ const formatDate = (date) => {
 
     tbody.innerHTML += `
       <tr id="row-${docSnap.id}">
-          <td><input type="date" value="${fecha}" disabled></td>
+          <td><input type="text" value="${pedido.semana || ""}" disabled></td>
           <td><input type="text" value="${pedido.nombreApellido || ""}" disabled></td>
-          <td><input type="text" value="${pedido.contacto || ""}" disabled></td>
-          <td><input type="number" value="${pedido.cantidad || 0}" disabled></td>
+          <td><input type="text" value="${pedido.tipoEvento || ""}" disabled></td>
+          <td><input type="date" value="${pedido.fechaAtencion || 0}" disabled></td>
+          <td><input type="text" value="${pedido.redSocial || ""}" disabled></td>
+          <td><input type="date" value="${pedido.fechaEvento || 0}" disabled></td>
           <td>
               <select disabled>
-                  <option value="Concierto" ${pedido.tipoEvento === "Concierto" ? "selected" : ""}>Concierto</option>
+                  <option value="Por Confirmar" ${pedido.tipoEvento === "Concierto" ? "selected" : ""}>Concierto</option>
                   <option value="Boda" ${pedido.tipoEvento === "Boda" ? "selected" : ""}>Boda</option>
                   <option value="Conferencia" ${pedido.tipoEvento === "Conferencia" ? "selected" : ""}>Conferencia</option>
               </select>
           </td>
-          <td><input type="text" value="${pedido.estilo || ""}" disabled></td>
-          <td><input type="text" value="${pedido.texto || ""}" disabled></td>
-          <td><input type="date" value="${fechaEvento}" disabled></td>
+          <td><input type="text" value="${pedido.cotizacion || ""}" disabled></td>
+          <td><input type="text" value="${pedido.montoTicket || ""}" disabled></td>
+          <td><input type="text" value="${pedido.observaciones || ""}" disabled></td>
+          <td>
+            <input type="text" id="cotizacion-${doc.id}" value="${pedido.cotizacionURL || ""}" placeholder="URL Cotización">
+            <input type="text" id="propuesta-${doc.id}" value="${pedido.propuestaURL || ""}" placeholder="URL Propuesta">
+        </td>
           <td>
               <button onclick="toggleEdit('${docSnap.id}')">Editar</button>
               <button class="hidden" onclick="savePedido('${docSnap.id}')">Guardar</button>
               <button class="hidden" onclick="cancelEdit('${docSnap.id}')">Descartar</button>
               <button onclick="deletePedido('${docSnap.id}')">Eliminar</button>
-          </td>
-          <td>
-              <input type="file" id="file1-${docSnap.id}" class="hidden" onchange="uploadFile('${docSnap.id}', 1)">
-              <input type="file" id="file2-${docSnap.id}" class="hidden" onchange="uploadFile('${docSnap.id}', 2)">
-              <div id="fileLinks-${docSnap.id}">
-                  ${pedido.archivo1URL ? `<a href="${pedido.archivo1URL}" target="_blank" download>📂 Archivo 1</a>` : ""}
-                  ${pedido.archivo2URL ? `<a href="${pedido.archivo2URL}" target="_blank" download>📂 Archivo 2</a>` : ""}
-              </div>
           </td>
       </tr>`;
   });
