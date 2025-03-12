@@ -16,7 +16,7 @@
     <h2>Administración de Pedidos</h2> 
     <label>Semana:</label><input type="text" id="semana" placeholder="Semana">
     <label>Nombre y Apellido:</label><input type="text" id="nombreApellido" required>
-    <label>Tipo de Evento:</label><input type="text" id="TipoEvento">
+    <label>Tipo de Evento:</label><input type="text" id="tipoEvento">
     <label>Fecha de Atención:</label><input type="date" id="fechaAtencion" required>
     <label>Red Social:</label><input type="text" id="redSocial">
     <label>Fecha de Evento:</label><input type="date" id="fechaEvento">
@@ -112,7 +112,7 @@ resetInactivityTimer();
     <tr id="row-${doc.id}">
         <td><input type="text" value="${pedido.semana || ""}" disabled></td>
         <td><input type="text" value="${pedido.nombreApellido || ""}" disabled></td>
-        <td><input type="text" value="${pedido.TipoEvento || ""}" disabled></td>
+        <td><input type="text" value="${pedido.tipoEvento || ""}" disabled></td>
         <td><input type="date" value="${pedido.fechaAtencion || ""}" disabled></td>
         <td><input type="text" value="${pedido.redSocial || ""}" disabled></td>
         <td><input type="date" value="${pedido.fechaEvento || ""}" disabled></td>
@@ -162,7 +162,7 @@ resetInactivityTimer();
         const updatedPedido = {
             semana: inputs[0].value,
             nombreApellido: inputs[1].value,
-            TipoEvento: inputs[2].value,
+            tipoEvento: inputs[2].value,
             fechaAtencion: inputs[3].value,
             redSocial: inputs[4].value,
             fechaEvento: inputs[5].value,
@@ -206,7 +206,7 @@ resetInactivityTimer();
   async function addPedido() {
     const semana = document.getElementById("semana").value;
     const nombreApellido = document.getElementById("nombreApellido").value;
-    const TipoEvento = document.getElementById("TipoEvento").value;
+    const tipoEvento = document.getElementById("tipoEvento").value;
     const fechaAtencion = document.getElementById("fechaAtencion").value;
     const redSocial = document.getElementById("redSocial").value;
     const status = document.getElementById("status").value;
@@ -219,7 +219,7 @@ resetInactivityTimer();
             
           semana,
           nombreApellido,
-          TipoEvento,
+          tipoEvento,
           fechaAtencion, 
           redSocial,
           fechaEvento,
