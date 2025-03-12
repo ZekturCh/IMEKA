@@ -16,7 +16,7 @@
     <h2>Administración de Pedidos</h2> 
     <label>Semana:</label><input type="text" id="semana" placeholder="Semana">
     <label>Nombre y Apellido:</label><input type="text" id="nombreApellido" required>
-    <label>Tipo de Evento:</label><input type="text" id="tipoEvento">
+    <label>Tipo de Evento:</label><input type="text" id="TipoEvento">
     <label>Fecha de Atención:</label><input type="date" id="fechaAtencion" required>
     <label>Red Social:</label><input type="text" id="redSocial">
     <label>Fecha de Evento:</label><input type="date" id="fechaEvento">
@@ -112,7 +112,7 @@ resetInactivityTimer();
     <tr id="row-${doc.id}">
         <td><input type="text" value="${pedido.semana || ""}" disabled></td>
         <td><input type="text" value="${pedido.nombreApellido || ""}" disabled></td>
-        <td><input type="text" value="${pedido.tipoEvento || ""}" disabled></td>
+        <td><input type="text" value="${pedido.TipoEvento || ""}" disabled></td>
         <td><input type="date" value="${pedido.fechaAtencion || ""}" disabled></td>
         <td><input type="text" value="${pedido.redSocial || ""}" disabled></td>
         <td><input type="date" value="${pedido.fechaEvento || ""}" disabled></td>
