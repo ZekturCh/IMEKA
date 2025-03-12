@@ -50,48 +50,58 @@
         document.addEventListener("click", resetInactivityTimer);
         resetInactivityTimer();
 
-        // Función para agregar pedido
-        window.agregarPedido = async () => {
-            const semana = document.getElementById("semana").value;
-            const nombre = document.getElementById("nombre").value;
-            const tipo = document.getElementById("tipo").value;
-            const atencion = document.getElementById("atencion").value;
-            const plataforma = document.getElementById("plataforma").value;
-            const fecha = document.getElementById("fecha").value;
-            const estado = document.getElementById("estado").value;
-            const coti = document.getElementById("coti").value;
-            const monto = document.getElementById("monto").value;
-            const comentario = document.getElementById("comentario").value;
+       // Función para agregar pedido
+window.agregarPedido = async () => {
+    const semana = document.getElementById("semana").value || "No definido";
+    const nombre = document.getElementById("nombre").value;
+    const tipo = document.getElementById("tipo").value || "No definido";
+    const atencion = document.getElementById("atencion").value;
+    const plataforma = document.getElementById("plataforma").value || "No definido";
+    const fecha = document.getElementById("fecha").value || new Date().toISOString().split("T")[0]; // Fecha actual en formato YYYY-MM-DD
+    const estado = document.getElementById("estado").value || document.getElementById("estado").options[0].value; // Primera opción del select
+    const coti = document.getElementById("coti").value || "No definido";
+    const monto = document.getElementById("monto").value || "No definido";
+    const comentario = document.getElementById("comentario").value;
 
-            if (!nombre || !atención || !comentario) {
-                alert("Completa los cambos");
-                return;
-            }
+    // Validación de campos obligatorios
+    if (!nombre || !atencion || !comentario) {
+        alert("Completa los campos obligatorios: Nombre, Atención y Comentario.");
+        return;
+    }
 
-//semana nombre tipo atencion plataforma fecha estado coti monto comentario
-            try {
-                await addDoc(collection(db, "pedidos"), {
-                    semana,
-                    nombre,
-                    tipo,
-                    atencion,
-                    plataforma,
-                    fecha,
-                    estado,  
-                    coti,
-                    monto, 
-                    comentario,
-                    textoAdicional1: "No asignado",
-                    textoAdicional2: "No asignado"
-                });
-                document.getElementById("fecha").value = "";
-                document.getElementById("texto").value = "";
-                alert("Pedido agregado correctamente.");
-            } catch (error) {
-                console.error("Error al agregar pedido:", error);
-            }
-        };
+    try {
+        await addDoc(collection(db, "pedidos"), {
+            semana,
+            nombre,
+            tipo,
+            atencion,
+            plataforma,
+            fecha,
+            estado,  
+            coti,
+            monto, 
+            comentario,
+            textoAdicional1: "No asignado",
+            textoAdicional2: "No asignado"
+        });
 
+        // Limpiar campos después de agregar
+        document.getElementById("semana").value = "";
+        document.getElementById("nombre").value = "";
+        document.getElementById("tipo").value = "";
+        document.getElementById("atencion").value = "";
+        document.getElementById("plataforma").value = "";
+        document.getElementById("fecha").value = "";
+        document.getElementById("estado").value = "";
+        document.getElementById("coti").value = "";
+        document.getElementById("monto").value = "";
+        document.getElementById("comentario").value = "";
+
+        alert("Pedido agregado correctamente.");
+    } catch (error) {
+        console.error("Error al agregar pedido:", error);
+    }
+};
         // Función para cargar pedidos en la tabla
         const tablaPedidos = document.getElementById("tablaPedidos");
 
