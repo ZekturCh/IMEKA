@@ -203,40 +203,46 @@ resetInactivityTimer();
 }
 
     // Agregar pedido
-  async function addPedido() {
-    const semana = document.getElementById("semana").value;
+ async function addPedido() {
     const nombreApellido = document.getElementById("nombreApellido").value;
-    const tipoEvento = document.getElementById("tipoEvento").value;
-    const fechaAtencion = document.getElementById("fechaAtencion").value;
-    const redSocial = document.getElementById("redSocial").value;
-    const fechaEvento = document.getElementById("fechaEvento").value;
-    const status = document.getElementById("status").value;
-    const cotizacion = document.getElementById("cotizacion").value;
-    const montoTicket = document.getElementById("montoTicket").value;
     const observaciones = document.getElementById("observaciones").value;
 
-    try {
-        await addDoc(collection(db, "pedidos"), {
-            
-          semana,
-          nombreApellido,
-          tipoEvento,
-          fechaAtencion, 
-          redSocial,
-          fechaEvento,
-          status,
-          cotizacion,
-          montoTicket,
-          observaciones   
-        });
+    if (!nombreApellido || !observaciones) {
+        alert("Por favor, completa los campos obligatorios: Nombre y Observaciones.");
+        return;
+    }
 
+    const fechaAtencionInput = document.getElementById("fechaAtencion");
+    const tipoEventoInput = document.getElementById("tipoEvento");
+    const redSocialInput = document.getElementById("redSocial");
+    const fechaEventoInput = document.getElementById("fechaEvento");
+    const cotizacionInput = document.getElementById("cotizacion");
+    const montoTicketInput = document.getElementById("montoTicket");
+    const statusInput = document.getElementById("status");
+
+    const pedido = {
+        semana: document.getElementById("semana").value || "No definido",
+        nombreApellido,
+        tipoEvento: tipoEventoInput.value || "No definido",
+        fechaAtencion: fechaAtencionInput.value || new Date().toISOString().split("T")[0], // Fecha actual si está vacío
+        redSocial: redSocialInput.value || "No definido",
+        fechaEvento: fechaEventoInput.value || "No definido",
+        status: statusInput.value || statusInput.options[0].value, // Primera opción del select si está vacío
+        cotizacion: cotizacionInput.value || "No definido",
+        montoTicket: montoTicketInput.value || "No definido",
+        observaciones
+    };
+
+    try {
+        await addDoc(collection(db, "pedidos"), pedido);
         alert("Pedido agregado correctamente.");
-        loadPedidos();
+        loadPedidos(); // Recargar tabla
     } catch (error) {
         console.error("Error al agregar pedido:", error);
         alert("Hubo un error al agregar el pedido.");
     }
 }
+
     // Exponer funciones
     window.addPedido = addPedido;
     window.loadPedidos = loadPedidos;
