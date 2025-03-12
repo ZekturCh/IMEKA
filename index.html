@@ -197,10 +197,9 @@ function toggleEdit(id) {
 
 
     // Guardar cambios
-   async function savePedido(id) {
+ async function savePedido(id) {
     const row = document.getElementById(`row-${id}`);
     const inputs = row.querySelectorAll("input:not([type='file']), select");
-
     const updatedPedido = {
         semana: inputs[0].value,
         nombreApellido: inputs[1].value,
@@ -212,7 +211,6 @@ function toggleEdit(id) {
         cotizacion: inputs[7].value,
         montoTicket: inputs[8].value,
         observaciones: inputs[9].value,
-        // Leer los inputs de URL:
         cotizacionURL: document.getElementById(`cotizacionURL-${id}`).value,
         propuestaURL: document.getElementById(`propuestaURL-${id}`).value
     };
@@ -220,7 +218,6 @@ function toggleEdit(id) {
     try {
         const pedidoRef = doc(db, "pedidos", id);
         await updateDoc(pedidoRef, updatedPedido);
-        // Aquí puedes ocultar los inputs de URL y volver al modo visualización:
         toggleEdit(id);
         alert("Pedido actualizado correctamente.");
     } catch (error) {
@@ -228,6 +225,7 @@ function toggleEdit(id) {
         alert("Hubo un error al actualizar el pedido.");
     }
 }
+
 
 
     // Cancelar edición
