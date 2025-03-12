@@ -100,6 +100,14 @@ document.addEventListener("click", resetInactivityTimer);
 // Inicializar el temporizador
 resetInactivityTimer();
 
+        //formato de fecha
+const formatDate = (date) => {
+    if (!date) return "No definido";
+    const d = new Date(date);
+    return `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getFullYear()}`;
+};
+
+        
     // Cargar pedidos
    async function loadPedidos() {
     const querySnapshot = await getDocs(collection(db, "pedidos"));
@@ -127,6 +135,10 @@ resetInactivityTimer();
         <td><input type="text" value="${pedido.cotizacion || ""}" disabled></td>
         <td><input type="text" value="${pedido.montoTicket || ""}" disabled></td>
         <td><input type="text" value="${pedido.observaciones || ""}" disabled></td>
+        <td>
+            <input type="text" id="cotizacion-${doc.id}" value="${pedido.cotizacionURL || ""}" placeholder="URL Cotización">
+            <input type="text" id="propuesta-${doc.id}" value="${pedido.propuestaURL || ""}" placeholder="URL Propuesta">
+        </td>
         <td>
             <button onclick="toggleEdit('${doc.id}')">Editar</button>
             <button class="hidden" onclick="savePedido('${doc.id}')">Guardar</button>
@@ -169,7 +181,9 @@ resetInactivityTimer();
             status: inputs[6].value,
             cotizacion: inputs[7].value,
             montoTicket: inputs[8].value,
-            observaciones: inputs[9].value
+            observaciones: inputs[9].value,
+            cotizacionURL: document.getElementById(`cotizacion-${id}`).value || "",
+            propuestaURL: document.getElementById(`propuesta-${id}`).value || ""
         };
 
         try {
@@ -224,13 +238,15 @@ resetInactivityTimer();
         semana: document.getElementById("semana").value || "No definido",
         nombreApellido,
         tipoEvento: tipoEventoInput.value || "No definido",
-        fechaAtencion: fechaAtencionInput.value || new Date().toISOString().split("T")[0], // Fecha actual si está vacío
+        fechaAtencion: formatDate(fechaAtencionInput.value) || formatDate(new Date()), // Fecha actual si está vacío
         redSocial: redSocialInput.value || "No definido",
-        fechaEvento: fechaEventoInput.value || "No definido",
+        fechaEvento: formatDate(fechaEventoInput.value), 
         status: statusInput.value || statusInput.options[0].value, // Primera opción del select si está vacío
         cotizacion: cotizacionInput.value || "No definido",
         montoTicket: montoTicketInput.value || "No definido",
-        observaciones
+        observaciones,
+        cotizacionURL: "", // Inicialmente vacío
+        propuestaURL: ""
     };
 
     try {
