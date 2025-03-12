@@ -154,37 +154,26 @@ resetInactivityTimer();
 
     // Alternar modo edición
  
-function toggleEdit(id) {
-    const row = document.getElementById(`row-${id}`);
-    const inputs = row.querySelectorAll("input:not([type='file']), select");
-    const botones = row.querySelectorAll("td:last-child button");
-
-    // Alternar habilitación de inputs
-    inputs.forEach(input => input.disabled = !input.disabled);
-
-    // Suponiendo que los botones están en el siguiente orden:
-    // [0]: Editar, [1]: Guardar, [2]: Descartar, [3]: Eliminar
-    if (botones[0].innerText === "Editar") {
-        // Modo edición: ocultar Editar y Eliminar, mostrar Guardar y Descartar
-        botones[0].classList.add("hidden");
-        botones[3].classList.add("hidden");
-        botones[1].classList.remove("hidden");
-        botones[2].classList.remove("hidden");
-
-        // Habilitar inputs de URL también
-        const cotInput = document.getElementById(`URLcoti`);
-        const propInput = document.getElementById(`URLpropu`);
-        if (cotInput) cotInput.disabled = false;
-        if (propInput) propInput.disabled = false;
-    } else {
-        // Si se sale de modo edición, se restauran los botones (esto lo hace savePedido o cancelEdit)
-        botones[0].classList.remove("hidden");
-        botones[3].classList.remove("hidden");
-        botones[1].classList.add("hidden");
-        botones[2].classList.add("hidden");
+ function toggleEdit(id) {
+      const row = document.getElementById(`row-${id}`);
+      // Habilitar todos los inputs y selects de la fila
+      const inputs = row.querySelectorAll("input, select");
+      inputs.forEach(input => {
+        input.disabled = false;
+      });
+    
+      // En la columna de acciones, suponemos que los botones tienen clases: btn-edit, btn-save, btn-cancel, btn-delete
+      const btnEdit = row.querySelector(".btn-edit");
+      const btnDelete = row.querySelector(".btn-delete");
+      const btnSave = row.querySelector(".btn-save");
+      const btnCancel = row.querySelector(".btn-cancel");
+    
+      // Ocultar Editar y Eliminar, mostrar Guardar y Descartar
+      btnEdit.classList.add("hidden");
+      btnDelete.classList.add("hidden");
+      btnSave.classList.remove("hidden");
+      btnCancel.classList.remove("hidden");
     }
-}
-
 
     // Guardar cambios
  async function savePedido(id) {
