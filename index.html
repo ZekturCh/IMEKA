@@ -139,7 +139,7 @@ const formatDate = (date) => {
           <td><input type="text" value="${pedido.cotizacion || ""}" disabled></td>
           <td><input type="text" value="${pedido.montoTicket || ""}" disabled></td>
           <td><input type="text" value="${pedido.observaciones || ""}" disabled></td>
-          <td>
+           <td>
               <input type="text" id="cotizacionURL-${doc.id}" value="${pedido.cotizacionURL || 'No definido'}" disabled placeholder="URL Cotización">
               <br>
               <input type="text" id="propuestaURL-${doc.id}" value="${pedido.propuestaURL || 'No definido'}" disabled placeholder="URL Propuesta">
@@ -262,6 +262,9 @@ async function addPedido() {
     const cotizacion = document.getElementById("cotizacion").value || "No definido";
     const montoTicket = document.getElementById("montoTicket").value || "No definido";
     const observaciones = document.getElementById("observaciones").value;
+    const cotizacionURL = document.getElementById(`cotizacionURL-${id}`).value || "No definido";
+    const propuestaURL = document.getElementById(`propuestaURL-${id}`).value || "No definido";
+
 
     if (!nombreApellido || !observaciones) {
         alert("Por favor, completa los campos obligatorios: Nombre y Observaciones.");
