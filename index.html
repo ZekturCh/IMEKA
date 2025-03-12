@@ -200,6 +200,13 @@ function toggleEdit(id) {
  async function savePedido(id) {
     const row = document.getElementById(`row-${id}`);
     const inputs = row.querySelectorAll("input:not([type='file']), select");
+     const cotizacionURLElement = document.getElementById(`cotizacionURL-${id}`);
+    const propuestaURLElement = document.getElementById(`propuestaURL-${id}`);
+         if (!cotizacionURLElement || !propuestaURLElement) {
+                console.error("No se encontró alguno de los inputs de URL para el pedido " + id);
+                return;
+            }
+    
     const updatedPedido = {
         semana: inputs[0].value,
         nombreApellido: inputs[1].value,
@@ -211,8 +218,8 @@ function toggleEdit(id) {
         cotizacion: inputs[7].value,
         montoTicket: inputs[8].value,
         observaciones: inputs[9].value,
-        cotizacionURL: document.getElementById(`cotizacionURL-${id}`).value,
-        propuestaURL: document.getElementById(`propuestaURL-${id}`).value
+        cotizacionURL: cotizacionURLElement.value,
+        propuestaURL: propuestaURLElement.value
     };
 
     try {
