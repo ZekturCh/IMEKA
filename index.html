@@ -257,8 +257,8 @@ async function addPedido() {
     const cotizacion = document.getElementById("cotizacion").value || "No definido";
     const montoTicket = document.getElementById("montoTicket").value || "No definido";
     const observaciones = document.getElementById("observaciones").value;
-    const URLcoti = "No definido";
-    const URLpropu =  "No definido";
+    const URLcoti = document.getElementById("URLcoti").value || "No definido";
+    const URLpropu =  document.getElementById("URLpropu").value || "No definido";
 
 
     if (!nombreApellido || !observaciones) {
