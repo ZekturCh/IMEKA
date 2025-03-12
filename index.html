@@ -108,37 +108,38 @@ resetInactivityTimer();
 
     querySnapshot.forEach((doc) => {
         const pedido = doc.data();
-        tbody.innerHTML += 
-            <tr id="row-${doc.id}">
-                <td><input type="text" value="${pedido.semana || ""}" disabled></td>
-                <td><input type="text" value="${pedido.nombreApellido || ""}" disabled></td>
-                <td><input type="text" value="${pedido.tipoEvento || ""}" disabled></td>
-                <td><input type="date" value="${pedido.fechaAtencion || ""}" disabled></td>
-                <td><input type="text" value="${pedido.redSocial || ""}" disabled></td>
-                <td><input type="date" value="${pedido.fechaEvento || ""}" disabled></td>
-                <td>
-                    <select disabled>
-                        <option value="Concierto" ${pedido.tipoEvento === "Concierto" ? "selected" : ""}>Concierto</option>
-                        <option value="Confirmado" ${pedido.tipoEvento === "Confirmado" ? "selected" : ""}>Confirmado</option>
-                        <option value="Cancelado" ${pedido.tipoEvento === "Cancelado" ? "selected" : ""}>Cancelado</option>
-                    </select>
-                </td>
-                <td><input type="text" value="${pedido.cotizacion || ""}" disabled></td>
-                <td><input type="text" value="${pedido.montoTicket || ""}" disabled></td>
-                <td><input type="text" value="${pedido.observaciones || ""}" disabled></td>
-                <td>
-                    <button onclick="toggleEdit('${doc.id}')">Editar</button>
-                    <button class="hidden" onclick="savePedido('${doc.id}')">Guardar</button>
-                    <button class="hidden" onclick="cancelEdit('${doc.id}')">Descartar</button>
-                    <button onclick="deletePedido('${doc.id}')">Eliminar</button>
-                </td>
-            </tr>;
+        tbody.innerHTML += `
+    <tr id="row-${doc.id}">
+        <td><input type="text" value="${pedido.semana || ""}" disabled></td>
+        <td><input type="text" value="${pedido.nombreApellido || ""}" disabled></td>
+        <td><input type="text" value="${pedido.tipoEvento || ""}" disabled></td>
+        <td><input type="date" value="${pedido.fechaAtencion || ""}" disabled></td>
+        <td><input type="text" value="${pedido.redSocial || ""}" disabled></td>
+        <td><input type="date" value="${pedido.fechaEvento || ""}" disabled></td>
+        <td>
+            <select disabled>
+                <option value="Por coordinar" ${pedido.status === "Por coordinar" ? "selected" : ""}>Por coordinar</option>
+                <option value="Confirmado" ${pedido.status === "Confirmado" ? "selected" : ""}>Confirmado</option>
+                <option value="Cancelado" ${pedido.status === "Cancelado" ? "selected" : ""}>Cancelado</option>
+
+            </select>
+        </td>
+        <td><input type="text" value="${pedido.cotizacion || ""}" disabled></td>
+        <td><input type="text" value="${pedido.montoTicket || ""}" disabled></td>
+        <td><input type="text" value="${pedido.observaciones || ""}" disabled></td>
+        <td>
+            <button onclick="toggleEdit('${doc.id}')">Editar</button>
+            <button class="hidden" onclick="savePedido('${doc.id}')">Guardar</button>
+            <button class="hidden" onclick="cancelEdit('${doc.id}')">Descartar</button>
+            <button onclick="deletePedido('${doc.id}')">Eliminar</button>
+        </td>
+    </tr>`;
     });
 }
 
     // Alternar modo edición
     function toggleEdit(id) {
-    const row = document.getElementById(row-${id});
+    const row = document.getElementById(`row-${id}`);
     const inputs = row.querySelectorAll("input, select");
     const buttons = row.querySelectorAll("button");
 
@@ -155,7 +156,7 @@ resetInactivityTimer();
 
     // Guardar cambios
     async function savePedido(id) {
-        const row = document.getElementById(row-${id});
+        const row = document.getElementById(`row-${id}`);
         const inputs = row.querySelectorAll("input, select");
 
         const updatedPedido = {
