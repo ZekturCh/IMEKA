@@ -36,7 +36,7 @@
               <tr>
                 <th>Semana</th><th>Nombre y Apellido</th><th>Tipo de Evento</th><th>Fecha de Atención</th>
                 <th>Red Social</th><th>Fecha de Evento</th><th>Status</th><th>Cotización</th>
-                <th>Monto del Ticket</th><th>Observaciones</th><th>Acciones</th>
+                <th>Monto del Ticket</th><th>Observaciones</th><th>URLS</th><th>Acciones</th>
               </tr>
             </thead>
             <tbody id="pedidosTabla"></tbody>
@@ -155,52 +155,70 @@ const formatDate = (date) => {
 
 
     // Alternar modo edición
-    function toggleEdit(id) {
+ 
+function toggleEdit(id) {
     const row = document.getElementById(`row-${id}`);
-    const inputs = row.querySelectorAll("input, select");
+    // Seleccionar todos los inputs y selects que ya estaban
+    const inputs = row.querySelectorAll("input:not([type='file']), select");
+    // Seleccionar los inputs de archivos
+    const fileInputs = row.querySelectorAll("input[type='file']");
+    // Seleccionar botones en la columna de acciones
     const buttons = row.querySelectorAll("button");
 
+    // Alternar habilitación de inputs de texto y select
     inputs.forEach(input => input.disabled = !input.disabled);
+    // Alternar visibilidad de inputs de archivo (para que se puedan subir archivos en modo edición)
+    fileInputs.forEach(input => input.classList.toggle("hidden"));
+
+    // En la columna de acciones, se ocultan "Editar" y "Eliminar", y se muestran "Guardar" y "Cancelar"
+    // Asumiremos que el primer botón es "Editar" y el último es "Eliminar"
+    // Los botones "Guardar" y "Cancelar" están en posiciones intermedias.
     buttons.forEach((button, index) => {
-        if (index === 0 || index === 3) { // "Editar" y "Eliminar"
+        // Si el botón es "Editar" o "Eliminar" (primer y último), se ocultan en modo edición
+        if (index === 0 || index === buttons.length - 1) {
             button.classList.toggle("hidden");
-        } else { // "Guardar" y "Descartar"
+        } else { // Los botones intermedios ("Guardar" y "Cancelar") se muestran en modo edición
             button.classList.toggle("hidden");
         }
     });
 }
 
-
     // Guardar cambios
     async function savePedido(id) {
-        const row = document.getElementById(`row-${id}`);
-        const inputs = row.querySelectorAll("input, select");
+    const row = document.getElementById(`row-${id}`);
+    // Seleccionar inputs de datos (suponiendo que el orden es el mismo que en la fila)
+    const inputs = row.querySelectorAll("input:not([type='file']), select");
+    // Los campos en el orden en que están en la fila (según tu encabezado):
+    // 0: semana, 1: nombreApellido, 2: tipoEvento, 3: fechaAtencion, 4: redSocial, 5: fechaEvento, 6: status, 7: cotizacion, 8: montoTicket, 9: observaciones
+    // Y en la columna de URLs tenemos dos inputs con IDs "cotizacionURL-{id}" y "propuestaURL-{id}"
+    const cotizacionURL = document.getElementById(`cotizacionURL-${id}`).value;
+    const propuestaURL = document.getElementById(`propuestaURL-${id}`).value;
 
-        const updatedPedido = {
-            semana: inputs[0].value,
-            nombreApellido: inputs[1].value,
-            tipoEvento: inputs[2].value,
-            fechaAtencion: inputs[3].value,
-            redSocial: inputs[4].value,
-            fechaEvento: inputs[5].value,
-            status: inputs[6].value,
-            cotizacion: inputs[7].value,
-            montoTicket: inputs[8].value,
-            observaciones: inputs[9].value,
-            cotizacionURL: document.getElementById(`cotizacion-${id}`).value || "",
-            propuestaURL: document.getElementById(`propuesta-${id}`).value || ""
-        };
+    const updatedPedido = {
+        semana: inputs[0].value,
+        nombreApellido: inputs[1].value,
+        tipoEvento: inputs[2].value,
+        fechaAtencion: inputs[3].value,
+        redSocial: inputs[4].value,
+        fechaEvento: inputs[5].value,
+        status: inputs[6].value,
+        cotizacion: inputs[7].value,
+        montoTicket: inputs[8].value,
+        observaciones: inputs[9].value,
+        cotizacionURL,
+        propuestaURL
+    };
 
-        try {
-            const pedidoRef = doc(db, "pedidos", id);
-            await updateDoc(pedidoRef, updatedPedido);
-            toggleEdit(id);
-            alert("Pedido actualizado correctamente.");
-        } catch (error) {
-            console.error("Error al actualizar pedido:", error);
-            alert("Hubo un error al actualizar el pedido.");
-        }
+    try {
+        const pedidoRef = doc(db, "pedidos", id);
+        await updateDoc(pedidoRef, updatedPedido);
+        toggleEdit(id); // Cierra el modo edición
+        alert("Pedido actualizado correctamente.");
+    } catch (error) {
+        console.error("Error al actualizar pedido:", error);
+        alert("Hubo un error al actualizar el pedido.");
     }
+}
 
     // Cancelar edición
     function cancelEdit(id) {
