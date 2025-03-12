@@ -29,6 +29,8 @@
     <label>Cotización:</label><input type="text" id="cotizacion">
     <label>Monto del Ticket:</label><input type="text" id="montoTicket">
     <label>Observaciones:</label><input type="text" id="observaciones" required>
+    <input class="hidden" type="text" id="URLcoti">
+    <input class="hidden" type="text" id="URLpropu">
     <button onclick="addPedido()">Agregar Pedido</button>
     <button onclick="handleSignOut()">Cerrar Sesión</button>
         <table>
@@ -100,12 +102,6 @@ document.addEventListener("click", resetInactivityTimer);
 // Inicializar el temporizador
 resetInactivityTimer();
 
-        //formato de fecha
-const formatDate = (date) => {
-    if (!date) return "No definido";
-    const d = new Date(date);
-    return `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getFullYear()}`;
-};
 
         
     // Cargar pedidos
@@ -140,9 +136,9 @@ const formatDate = (date) => {
           <td><input type="text" value="${pedido.montoTicket || ""}" disabled></td>
           <td><input type="text" value="${pedido.observaciones || ""}" disabled></td>
            <td>
-              <input type="text" id="cotizacionURL-${doc.id}" value="${pedido.cotizacionURL || 'No definido'}" disabled placeholder="URL Cotización">
+              <input type="text" value="${pedido.URLcoti || 'No definido'}" disabled placeholder="URL Cotización">
               <br>
-              <input type="text" id="propuestaURL-${doc.id}" value="${pedido.propuestaURL || 'No definido'}" disabled placeholder="URL Propuesta">
+              <input type="text" value="${pedido.URLpropu || 'No definido'}" disabled placeholder="URL Propuesta">
             </td>
 
           <td>
@@ -160,38 +156,32 @@ const formatDate = (date) => {
  
 function toggleEdit(id) {
     const row = document.getElementById(`row-${id}`);
-    // Selecciona todos los inputs (excepto file) y los selects de la fila
     const inputs = row.querySelectorAll("input:not([type='file']), select");
-    // Alterna la propiedad disabled
-    inputs.forEach(input => input.disabled = !input.disabled);
-
-    // Ocultar/mostrar los botones según el modo edición
-    // Supongamos que en la celda de acciones tenemos 4 botones en este orden:
-    // [0]: Editar, [1]: Guardar, [2]: Cancelar, [3]: Eliminar
     const botones = row.querySelectorAll("td:last-child button");
 
+    // Alternar habilitación de inputs
+    inputs.forEach(input => input.disabled = !input.disabled);
+
+    // Suponiendo que los botones están en el siguiente orden:
+    // [0]: Editar, [1]: Guardar, [2]: Descartar, [3]: Eliminar
     if (botones[0].innerText === "Editar") {
-        // Entramos en modo edición: ocultamos "Editar" y "Eliminar", mostramos "Guardar" y "Cancelar"
-        botones[0].classList.add("hidden"); // Oculta "Editar"
-        botones[3].classList.add("hidden"); // Oculta "Eliminar"
-        botones[1].classList.remove("hidden"); // Muestra "Guardar"
-        botones[2].classList.remove("hidden"); // Muestra "Cancelar"
+        // Modo edición: ocultar Editar y Eliminar, mostrar Guardar y Descartar
+        botones[0].classList.add("hidden");
+        botones[3].classList.add("hidden");
+        botones[1].classList.remove("hidden");
+        botones[2].classList.remove("hidden");
 
-        // Además, si tienes inputs de archivos, hazlos visibles (quitando la clase "hidden")
-        const file1 = row.querySelector(`#file1-${id}`);
-        const file2 = row.querySelector(`#file2-${id}`);
-        if (file1) file1.classList.remove("hidden");
-        if (file2) file2.classList.remove("hidden");
-
-        // También, puedes habilitar los inputs de URL para que se puedan editar
-        const cotInput = document.getElementById(`cotizacionURL-${id}`);
-        const propInput = document.getElementById(`propuestaURL-${id}`);
-        if(cotInput) cotInput.disabled = false;
-        if(propInput) propInput.disabled = false;
+        // Habilitar inputs de URL también
+        const cotInput = document.getElementById(`URLcoti`);
+        const propInput = document.getElementById(`URLpropu`);
+        if (cotInput) cotInput.disabled = false;
+        if (propInput) propInput.disabled = false;
     } else {
-        // Salir del modo edición: se asume que savePedido() o cancelEdit() se encargarán de recargar la tabla
-        // o restablecer el estado.
-        // Aquí puedes dejar vacío o forzar un reload.
+        // Si se sale de modo edición, se restauran los botones (esto lo hace savePedido o cancelEdit)
+        botones[0].classList.remove("hidden");
+        botones[3].classList.remove("hidden");
+        botones[1].classList.add("hidden");
+        botones[2].classList.add("hidden");
     }
 }
 
@@ -200,8 +190,8 @@ function toggleEdit(id) {
  async function savePedido(id) {
     const row = document.getElementById(`row-${id}`);
     const inputs = row.querySelectorAll("input:not([type='file']), select");
-     const cotizacionURLElement = document.getElementById(`cotizacionURL-${id}`);
-    const propuestaURLElement = document.getElementById(`propuestaURL-${id}`);
+     const cotizacionURLElement = document.getElementById(`URLcoti`);
+    const propuestaURLElement = document.getElementById(`URLpropu`);
          if (!cotizacionURLElement || !propuestaURLElement) {
                 console.error("No se encontró alguno de los inputs de URL para el pedido " + id);
                 return;
@@ -218,8 +208,8 @@ function toggleEdit(id) {
         cotizacion: inputs[7].value,
         montoTicket: inputs[8].value,
         observaciones: inputs[9].value,
-        cotizacionURL: cotizacionURLElement.value,
-        propuestaURL: propuestaURLElement.value
+        URLcoti: inputs[10].value,
+        URLpropu: inputs[11].value
     };
 
     try {
@@ -267,8 +257,8 @@ async function addPedido() {
     const cotizacion = document.getElementById("cotizacion").value || "No definido";
     const montoTicket = document.getElementById("montoTicket").value || "No definido";
     const observaciones = document.getElementById("observaciones").value;
-    const cotizacionURL = document.getElementById(`cotizacionURL-${id}`).value || "No definido";
-    const propuestaURL = document.getElementById(`propuestaURL-${id}`).value || "No definido";
+    const URLcoti = "No definido";
+    const URLpropu =  "No definido";
 
 
     if (!nombreApellido || !observaciones) {
@@ -288,8 +278,8 @@ async function addPedido() {
             cotizacion,
             montoTicket,
             observaciones,
-            archivo1URL: "",
-            archivo2URL: ""
+            archivo1URL,
+            archivo2URL
         });
         alert("Pedido agregado correctamente.");
         loadPedidos();
