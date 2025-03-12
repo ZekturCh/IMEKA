@@ -194,7 +194,7 @@ resetInactivityTimer();
 
     try {
         await deleteDoc(doc(db, "pedidos", id));
-        document.getElementById(row-${id}).remove(); // Elimina la fila visualmente
+       document.getElementById(`row-${id}`).remove();
         alert("Pedido eliminado correctamente.");
     } catch (error) {
         console.error("Error al eliminar pedido:", error);
