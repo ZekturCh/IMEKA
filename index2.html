@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración de Pedidos</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { width: 80%; margin: auto; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <h2>Administración de Pedidos</h2> 
+    <label>Semana:</label><input type="text" id="semana" placeholder="Semana">
+    <label>Nombre y Apellido:</label><input type="text" id="nombreApellido" required>
+    <label>Tipo de Evento:</label><input type="text" id="tipoEvento">
+    <label>Fecha de Atención:</label><input type="date" id="fechaAtencion" required>
+    <label>Red Social:</label><input type="text" id="redSocial">
+    <label>Fecha de Evento:</label><input type="date" id="fechaEvento">
+    <label>Estado del pedido:</label>
+    <select id="status">
+      <option value="Por coordinar">Por coordinar</option>
+      <option value="Confirmado">Confirmado</option>
+      <option value="Cancelado">Cancelado</option>
+    </select>
+    <label>Cotización:</label><input type="text" id="cotizacion">
+    <label>Monto del Ticket:</label><input type="text" id="montoTicket">
+    <label>Observaciones:</label><input type="text" id="observaciones" required>
+    <button onclick="addPedido()">Agregar Pedido</button>
+    <button onclick="handleSignOut()">Cerrar Sesión</button>
+        <table>
+            <thead>
+              <tr>
+                <th>Semana</th><th>Nombre y Apellido</th><th>Tipo de Evento</th><th>Fecha de Atención</th>
+                <th>Red Social</th><th>Fecha de Evento</th><th>Status</th><th>Cotización</th>
+                <th>Monto del Ticket</th><th>Observaciones</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="pedidosTabla"></tbody>
+        </table>
+    </div>
+
+
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-storage.js";
+        
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyAkWPKlXPf-1PoCOPr-WxEeei04JmOYo1w",
+        authDomain: "elixir-a7fe8.firebaseapp.com",
+        projectId: "elixir-a7fe8",
+        storageBucket: "elixir-a7fe8.firebasestorage.app",
+        messagingSenderId: "638327915376",
+        appId: "1:638327915376:web:094d13b75d5c94ac76c5b5",
+        measurementId: "G-Q368B5R9J5"
+    };
+
+    // Inicializa Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app); // Inicializa Firebase Storage
+
+    // Verifica autenticación
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            window.location.href = "login.html";
+        }
+    });
+        
+        const handleSignOut = () => {
+          signOut(auth).then(() => {
+            window.location.href = "/IMEKA/login.html"; // Redirigir a la página de login
+          }).catch(error => {
+            console.error("Error al cerrar sesión:", error);
+          });
+        };
+// Detectar inactividad
+let inactivityTimeout;
+
+const resetInactivityTimer = () => {
+  clearTimeout(inactivityTimeout);
+  inactivityTimeout = setTimeout(() => {
+    handleSignOut();
+  }, 5 * 60 * 1000); // 5 minutos
+};
+
+// Eventos para resetear el temporizador
+document.addEventListener("mousemove", resetInactivityTimer);
+document.addEventListener("keydown", resetInactivityTimer);
+document.addEventListener("click", resetInactivityTimer);
+
+// Inicializar el temporizador
+resetInactivityTimer();
+
+    // Cargar pedidos
+   async function loadPedidos() {
+    const querySnapshot = await getDocs(collection(db, "pedidos"));
+    const tbody = document.getElementById("pedidosTabla");
+    tbody.innerHTML = "";
+
+    querySnapshot.forEach((doc) => {
+        const pedido = doc.data();
+        tbody.innerHTML += 
+            <tr id="row-${doc.id}">
+                <td><input type="text" value="${pedido.semana || ""}" disabled></td>
+                <td><input type="text" value="${pedido.nombreApellido || ""}" disabled></td>
+                <td><input type="text" value="${pedido.tipoEvento || ""}" disabled></td>
+                <td><input type="date" value="${pedido.fechaAtencion || ""}" disabled></td>
+                <td><input type="text" value="${pedido.redSocial || ""}" disabled></td>
+                <td><input type="date" value="${pedido.fechaEvento || ""}" disabled></td>
+                <td>
+                    <select disabled>
+                        <option value="Concierto" ${pedido.tipoEvento === "Concierto" ? "selected" : ""}>Concierto</option>
+                        <option value="Confirmado" ${pedido.tipoEvento === "Confirmado" ? "selected" : ""}>Confirmado</option>
+                        <option value="Cancelado" ${pedido.tipoEvento === "Cancelado" ? "selected" : ""}>Cancelado</option>
+                    </select>
+                </td>
+                <td><input type="text" value="${pedido.cotizacion || ""}" disabled></td>
+                <td><input type="text" value="${pedido.montoTicket || ""}" disabled></td>
+                <td><input type="text" value="${pedido.observaciones || ""}" disabled></td>
+                <td>
+                    <button onclick="toggleEdit('${doc.id}')">Editar</button>
+                    <button class="hidden" onclick="savePedido('${doc.id}')">Guardar</button>
+                    <button class="hidden" onclick="cancelEdit('${doc.id}')">Descartar</button>
+                    <button onclick="deletePedido('${doc.id}')">Eliminar</button>
+                </td>
+            </tr>;
+    });
+}
+
+    // Alternar modo edición
+    function toggleEdit(id) {
+    const row = document.getElementById(row-${id});
+    const inputs = row.querySelectorAll("input, select");
+    const buttons = row.querySelectorAll("button");
+
+    inputs.forEach(input => input.disabled = !input.disabled);
+    buttons.forEach((button, index) => {
+        if (index === 0 || index === 3) { // "Editar" y "Eliminar"
+            button.classList.toggle("hidden");
+        } else { // "Guardar" y "Descartar"
+            button.classList.toggle("hidden");
+        }
+    });
+}
+
+
+    // Guardar cambios
+    async function savePedido(id) {
+        const row = document.getElementById(row-${id});
+        const inputs = row.querySelectorAll("input, select");
+
+        const updatedPedido = {
+            semana: inputs[0].value,
+            nombreApellido: inputs[1].value,
+            TipoEvento: inputs[2].value,
+            fechaAtencion: inputs[3].value,
+            redSocial: inputs[4].value,
+            fechaEvento: inputs[5].value,
+            status: inputs[6].value,
+            cotizacion: inputs[7].value,
+            montoTicket: inputs[8].value,
+            observaciones: inputs[9].value
+        };
+
+        try {
+            const pedidoRef = doc(db, "pedidos", id);
+            await updateDoc(pedidoRef, updatedPedido);
+            toggleEdit(id);
+            alert("Pedido actualizado correctamente.");
+        } catch (error) {
+            console.error("Error al actualizar pedido:", error);
+            alert("Hubo un error al actualizar el pedido.");
+        }
+    }
+
+    // Cancelar edición
+    function cancelEdit(id) {
+        loadPedidos(); // Recarga la tabla para restaurar los valores originales
+    }
+
+    // Eliminar pedido
+    async function deletePedido(id) {
+    if (!confirm("¿Seguro que deseas eliminar este pedido?")) return;
+
+    try {
+        await deleteDoc(doc(db, "pedidos", id));
+        document.getElementById(row-${id}).remove(); // Elimina la fila visualmente
+        alert("Pedido eliminado correctamente.");
+    } catch (error) {
+        console.error("Error al eliminar pedido:", error);
+        alert("Hubo un error al eliminar el pedido.");
+    }
+}
+
+     semana nombreApellido TipoEvento fechaAtencion redSocial fechaEvento status cotizacion montoTicket observaciones   
+    // Agregar pedido
+  async function addPedido() {
+    const semana = document.getElementById("semana").value;
+    const nombreApellido = document.getElementById("nombreApellido").value;
+    const TipoEvento = document.getElementById("TipoEvento").value;
+    const fechaAtencion = document.getElementById("fechaAtencion").value;
+    const redSocial = document.getElementById("redSocial").value;
+    const status = document.getElementById("status").value;
+    const cotizacion = document.getElementById("cotizacion").value;
+    const montoTicket = document.getElementById("montoTicket").value;
+    const observaciones = document.getElementById("observaciones").value;
+
+    try {
+        await addDoc(collection(db, "pedidos"), {
+            
+          semana,
+          nombreApellido,
+          TipoEvento,
+          fechaAtencion, 
+          redSocial,
+          fechaEvento,
+          status,
+          cotizacion,
+          montoTicket,
+          observaciones   
+        });
+
+        alert("Pedido agregado correctamente.");
+        loadPedidos();
+    } catch (error) {
+        console.error("Error al agregar pedido:", error);
+        alert("Hubo un error al agregar el pedido.");
+    }
+}
+    // Exponer funciones
+    window.addPedido = addPedido;
+    window.loadPedidos = loadPedidos;
+    window.deletePedido = deletePedido;
+    window.toggleEdit = toggleEdit;
+    window.savePedido = savePedido;
+    window.cancelEdit = cancelEdit;
+
+    // Cargar pedidos al inicio
+    window.onload = loadPedidos;
+</script>
+</body>
+</html>
