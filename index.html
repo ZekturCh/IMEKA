@@ -140,9 +140,11 @@ const formatDate = (date) => {
           <td><input type="text" value="${pedido.montoTicket || ""}" disabled></td>
           <td><input type="text" value="${pedido.observaciones || ""}" disabled></td>
           <td>
-            <input type="text" id="cotizacion-${doc.id}" value="${pedido.cotizacionURL || ""}" placeholder="URL Cotización">
-            <input type="text" id="propuesta-${doc.id}" value="${pedido.propuestaURL || ""}" placeholder="URL Propuesta">
-        </td>
+              <input type="text" id="cotizacionURL-${doc.id}" value="${pedido.cotizacionURL || 'No definido'}" disabled placeholder="URL Cotización">
+              <br>
+              <input type="text" id="propuestaURL-${doc.id}" value="${pedido.propuestaURL || 'No definido'}" disabled placeholder="URL Propuesta">
+            </td>
+
           <td>
               <button onclick="toggleEdit('${docSnap.id}')">Editar</button>
               <button class="hidden" onclick="savePedido('${docSnap.id}')">Guardar</button>
@@ -158,41 +160,46 @@ const formatDate = (date) => {
  
 function toggleEdit(id) {
     const row = document.getElementById(`row-${id}`);
-    // Seleccionar todos los inputs y selects que ya estaban
+    // Selecciona todos los inputs (excepto file) y los selects de la fila
     const inputs = row.querySelectorAll("input:not([type='file']), select");
-    // Seleccionar los inputs de archivos
-    const fileInputs = row.querySelectorAll("input[type='file']");
-    // Seleccionar botones en la columna de acciones
-    const buttons = row.querySelectorAll("button");
-
-    // Alternar habilitación de inputs de texto y select
+    // Alterna la propiedad disabled
     inputs.forEach(input => input.disabled = !input.disabled);
-    // Alternar visibilidad de inputs de archivo (para que se puedan subir archivos en modo edición)
-    fileInputs.forEach(input => input.classList.toggle("hidden"));
 
-    // En la columna de acciones, se ocultan "Editar" y "Eliminar", y se muestran "Guardar" y "Cancelar"
-    // Asumiremos que el primer botón es "Editar" y el último es "Eliminar"
-    // Los botones "Guardar" y "Cancelar" están en posiciones intermedias.
-    buttons.forEach((button, index) => {
-        // Si el botón es "Editar" o "Eliminar" (primer y último), se ocultan en modo edición
-        if (index === 0 || index === buttons.length - 1) {
-            button.classList.toggle("hidden");
-        } else { // Los botones intermedios ("Guardar" y "Cancelar") se muestran en modo edición
-            button.classList.toggle("hidden");
-        }
-    });
+    // Ocultar/mostrar los botones según el modo edición
+    // Supongamos que en la celda de acciones tenemos 4 botones en este orden:
+    // [0]: Editar, [1]: Guardar, [2]: Cancelar, [3]: Eliminar
+    const botones = row.querySelectorAll("td:last-child button");
+
+    if (botones[0].innerText === "Editar") {
+        // Entramos en modo edición: ocultamos "Editar" y "Eliminar", mostramos "Guardar" y "Cancelar"
+        botones[0].classList.add("hidden"); // Oculta "Editar"
+        botones[3].classList.add("hidden"); // Oculta "Eliminar"
+        botones[1].classList.remove("hidden"); // Muestra "Guardar"
+        botones[2].classList.remove("hidden"); // Muestra "Cancelar"
+
+        // Además, si tienes inputs de archivos, hazlos visibles (quitando la clase "hidden")
+        const file1 = row.querySelector(`#file1-${id}`);
+        const file2 = row.querySelector(`#file2-${id}`);
+        if (file1) file1.classList.remove("hidden");
+        if (file2) file2.classList.remove("hidden");
+
+        // También, puedes habilitar los inputs de URL para que se puedan editar
+        const cotInput = document.getElementById(`cotizacionURL-${id}`);
+        const propInput = document.getElementById(`propuestaURL-${id}`);
+        if(cotInput) cotInput.disabled = false;
+        if(propInput) propInput.disabled = false;
+    } else {
+        // Salir del modo edición: se asume que savePedido() o cancelEdit() se encargarán de recargar la tabla
+        // o restablecer el estado.
+        // Aquí puedes dejar vacío o forzar un reload.
+    }
 }
 
+
     // Guardar cambios
-    async function savePedido(id) {
+   async function savePedido(id) {
     const row = document.getElementById(`row-${id}`);
-    // Seleccionar inputs de datos (suponiendo que el orden es el mismo que en la fila)
     const inputs = row.querySelectorAll("input:not([type='file']), select");
-    // Los campos en el orden en que están en la fila (según tu encabezado):
-    // 0: semana, 1: nombreApellido, 2: tipoEvento, 3: fechaAtencion, 4: redSocial, 5: fechaEvento, 6: status, 7: cotizacion, 8: montoTicket, 9: observaciones
-    // Y en la columna de URLs tenemos dos inputs con IDs "cotizacionURL-{id}" y "propuestaURL-{id}"
-    const cotizacionURL = document.getElementById(`cotizacionURL-${id}`).value;
-    const propuestaURL = document.getElementById(`propuestaURL-${id}`).value;
 
     const updatedPedido = {
         semana: inputs[0].value,
@@ -205,20 +212,23 @@ function toggleEdit(id) {
         cotizacion: inputs[7].value,
         montoTicket: inputs[8].value,
         observaciones: inputs[9].value,
-        cotizacionURL,
-        propuestaURL
+        // Leer los inputs de URL:
+        cotizacionURL: document.getElementById(`cotizacionURL-${id}`).value,
+        propuestaURL: document.getElementById(`propuestaURL-${id}`).value
     };
 
     try {
         const pedidoRef = doc(db, "pedidos", id);
         await updateDoc(pedidoRef, updatedPedido);
-        toggleEdit(id); // Cierra el modo edición
+        // Aquí puedes ocultar los inputs de URL y volver al modo visualización:
+        toggleEdit(id);
         alert("Pedido actualizado correctamente.");
     } catch (error) {
         console.error("Error al actualizar pedido:", error);
         alert("Hubo un error al actualizar el pedido.");
     }
 }
+
 
     // Cancelar edición
     function cancelEdit(id) {
