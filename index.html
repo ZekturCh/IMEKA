@@ -4,7 +4,120 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Administrador de Clientes</title>
+ <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(135deg, #000000, #0a1b3d);
+      color: #e6e6e6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
 
+    h2 {
+      color: #00bfff;
+      text-align: center;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px #0077ff;
+    }
+
+    /* ---------- FORMULARIO ---------- */
+    .formulario {
+      background: rgba(25, 40, 70, 0.85);
+      padding: 20px 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0, 191, 255, 0.2);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      margin-bottom: 30px;
+    }
+
+    .formulario input, .formulario select {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #00bfff;
+      border-radius: 8px;
+      background-color: #0f203f;
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .formulario input:focus, .formulario select:focus {
+      border-color: #33ccff;
+      box-shadow: 0 0 5px #33ccff;
+    }
+
+    .formulario button {
+      margin-top: 10px;
+      background-color: #0077ff;
+      border: none;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .formulario button:hover {
+      background-color: #00bfff;
+      box-shadow: 0 0 10px #00bfff;
+    }
+
+    /* ---------- TABLA ---------- */
+    table {
+      width: 90%;
+      max-width: 900px;
+      border-collapse: collapse;
+      background: rgba(15, 30, 60, 0.9);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(0, 191, 255, 0.2);
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #1e90ff;
+    }
+
+    th {
+      background-color: #0b2a52;
+      color: #00bfff;
+    }
+
+    tr:nth-child(even) {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    input[disabled], select[disabled] {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #ccc;
+      border: 1px solid #444;
+    }
+
+    button {
+      background-color: #0077ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #00bfff;
+      box-shadow: 0 0 6px #00bfff;
+    }
+  </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import {
