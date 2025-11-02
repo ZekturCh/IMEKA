@@ -24,7 +24,6 @@
       text-shadow: 0 0 10px #0077ff;
     }
 
-    /* ---------- FORMULARIO ---------- */
     .formulario {
       background: rgba(25, 40, 70, 0.85);
       padding: 25px 35px;
@@ -74,7 +73,6 @@
       box-shadow: 0 0 10px #00bfff;
     }
 
-
     /* ---------- TABLA ---------- */
     table {
       width: 90%;
@@ -122,6 +120,7 @@
       box-shadow: 0 0 6px #00bfff;
     }
   </style>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import {
@@ -134,7 +133,6 @@
       deleteDoc
     } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
-    // Configuración Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAkWPKlXPf-1PoCOPr-WxEeei04JmOYo1w",
       authDomain: "elixir-a7fe8.firebaseapp.com",
@@ -145,13 +143,10 @@
       measurementId: "G-Q368B5R9J5",
     };
 
-    // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // ---------------------------
     // FUNCIÓN: Agregar cliente
-    // ---------------------------
     window.agregarCliente = async () => {
       const nombre = document.getElementById("nombre").value;
       const telefono = document.getElementById("telefono").value;
@@ -179,18 +174,18 @@
       }
     };
 
-    // ---------------------------
     // FUNCIÓN: Cargar tabla
-    // ---------------------------
     const tablaClientes = document.getElementById("tablaClientes");
 
     const cargarClientes = () => {
       onSnapshot(collection(db, "clientes"), (snapshot) => {
         tablaClientes.innerHTML = "";
+        let contador = 1; // 🔢 NUEVO: contador de filas
         snapshot.forEach((docSnap) => {
           const cliente = docSnap.data();
           const fila = document.createElement("tr");
           fila.innerHTML = `
+            <td>${contador}</td> <!-- 🔢 NUEVO: número de fila -->
             <td><input type="text" value="${cliente.nombre}" disabled></td>
             <td><input type="text" value="${cliente.telefono}" disabled></td>
             <td>
@@ -206,13 +201,12 @@
             </td>
           `;
           tablaClientes.appendChild(fila);
+          contador++; // 🔢 Aumenta el contador
         });
       });
     };
 
-    // ---------------------------
     // FUNCIÓN: Editar cliente
-    // ---------------------------
     window.editarCliente = async (boton, id) => {
       const fila = boton.parentNode.parentNode;
       const inputs = fila.querySelectorAll("input, select");
@@ -237,9 +231,7 @@
       }
     };
 
-    // ---------------------------
     // FUNCIÓN: Eliminar cliente
-    // ---------------------------
     window.eliminarCliente = async (id) => {
       if (confirm("¿Seguro que deseas eliminar este cliente?")) {
         try {
@@ -251,7 +243,6 @@
       }
     };
 
-    // Iniciar carga
     window.onload = cargarClientes;
   </script>
 </head>
@@ -271,6 +262,7 @@
   <table border="1">
     <thead>
       <tr>
+        <th>#</th> <!-- 🔢 NUEVO: encabezado para numeración -->
         <th>Nombre</th>
         <th>Teléfono</th>
         <th>Interés</th>
