@@ -73,7 +73,6 @@
       box-shadow: 0 0 10px #00bfff;
     }
 
-    /* ---------- TABLA ---------- */
     table {
       width: 90%;
       max-width: 900px;
@@ -99,12 +98,6 @@
       background-color: rgba(0, 0, 0, 0.2);
     }
 
-    input[disabled], select[disabled] {
-      background-color: rgba(255, 255, 255, 0.1);
-      color: #ccc;
-      border: 1px solid #444;
-    }
-
     button {
       background-color: #0077ff;
       color: white;
@@ -118,6 +111,23 @@
     button:hover {
       background-color: #00bfff;
       box-shadow: 0 0 6px #00bfff;
+    }
+
+    .boton-descargar {
+      margin-top: 15px;
+      background: linear-gradient(90deg, #0077ff, #00bfff);
+      color: #fff;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .boton-descargar:hover {
+      background: linear-gradient(90deg, #00bfff, #0077ff);
+      box-shadow: 0 0 10px #00bfff;
     }
   </style>
 
@@ -146,7 +156,10 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // FUNCIÓN: Agregar cliente
+    const tablaClientes = document.getElementById("tablaClientes");
+    let clientesCache = [];
+
+    // --- AGREGAR CLIENTE ---
     window.agregarCliente = async () => {
       const nombre = document.getElementById("nombre").value;
       const telefono = document.getElementById("telefono").value;
@@ -158,34 +171,27 @@
       }
 
       try {
-        await addDoc(collection(db, "clientes"), {
-          nombre,
-          telefono,
-          interes
-        });
-
+        await addDoc(collection(db, "clientes"), { nombre, telefono, interes });
         document.getElementById("nombre").value = "";
         document.getElementById("telefono").value = "";
         document.getElementById("interes").value = "urgente";
-
-        alert("Cliente agregado correctamente.");
       } catch (error) {
         console.error("Error al agregar cliente:", error);
       }
     };
 
-    // FUNCIÓN: Cargar tabla
-    const tablaClientes = document.getElementById("tablaClientes");
-
+    // --- CARGAR CLIENTES ---
     const cargarClientes = () => {
       onSnapshot(collection(db, "clientes"), (snapshot) => {
         tablaClientes.innerHTML = "";
-        let contador = 1; // 🔢 NUEVO: contador de filas
+        clientesCache = [];
+        let contador = 1;
         snapshot.forEach((docSnap) => {
-          const cliente = docSnap.data();
+          const cliente = { id: docSnap.id, ...docSnap.data() };
+          clientesCache.push(cliente);
           const fila = document.createElement("tr");
           fila.innerHTML = `
-            <td>${contador}</td> <!-- 🔢 NUEVO: número de fila -->
+            <td>${contador}</td>
             <td><input type="text" value="${cliente.nombre}" disabled></td>
             <td><input type="text" value="${cliente.telefono}" disabled></td>
             <td>
@@ -201,12 +207,12 @@
             </td>
           `;
           tablaClientes.appendChild(fila);
-          contador++; // 🔢 Aumenta el contador
+          contador++;
         });
       });
     };
 
-    // FUNCIÓN: Editar cliente
+    // --- EDITAR CLIENTE ---
     window.editarCliente = async (boton, id) => {
       const fila = boton.parentNode.parentNode;
       const inputs = fila.querySelectorAll("input, select");
@@ -224,23 +230,40 @@
             telefono: inputs[1].value,
             interes: inputs[2].value,
           });
-          alert("Cliente actualizado");
         } catch (error) {
           console.error("Error al actualizar cliente:", error);
         }
       }
     };
 
-    // FUNCIÓN: Eliminar cliente
+    // --- ELIMINAR CLIENTE ---
     window.eliminarCliente = async (id) => {
       if (confirm("¿Seguro que deseas eliminar este cliente?")) {
         try {
           await deleteDoc(doc(db, "clientes", id));
-          alert("Cliente eliminado");
         } catch (error) {
           console.error("Error al eliminar cliente:", error);
         }
       }
+    };
+
+    // --- DESCARGAR COMO CSV ---
+    window.descargarExcel = () => {
+      if (clientesCache.length === 0) {
+        alert("No hay clientes para descargar.");
+        return;
+      }
+
+      let csv = "N°;Nombre;Teléfono;Interés\n";
+      clientesCache.forEach((c, i) => {
+        csv += `${i + 1};${c.nombre};${c.telefono};${c.interes}\n`;
+      });
+
+      const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "clientes.csv";
+      link.click();
     };
 
     window.onload = cargarClientes;
@@ -248,21 +271,23 @@
 </head>
 
 <body>
-  <h2>Agregar Cliente</h2>
-  <input type="text" id="nombre" placeholder="Nombre y apellido">
-  <input type="text" id="telefono" placeholder="Teléfono">
-  <select id="interes">
-    <option value="urgente">Urgente</option>
-    <option value="poco interesada">Poco interesada</option>
-    <option value="descartado">Descartado</option>
-  </select>
-  <button onclick="agregarCliente()">Agregar Cliente</button>
+  <div class="formulario">
+    <h2>Agregar Cliente</h2>
+    <input type="text" id="nombre" placeholder="Nombre y apellido">
+    <input type="text" id="telefono" placeholder="Teléfono">
+    <select id="interes">
+      <option value="urgente">Urgente</option>
+      <option value="poco interesada">Poco interesada</option>
+      <option value="descartado">Descartado</option>
+    </select>
+    <button onclick="agregarCliente()">Agregar Cliente</button>
+  </div>
 
   <h2>Lista de Clientes</h2>
   <table border="1">
     <thead>
       <tr>
-        <th>#</th> <!-- 🔢 NUEVO: encabezado para numeración -->
+        <th>#</th>
         <th>Nombre</th>
         <th>Teléfono</th>
         <th>Interés</th>
@@ -271,5 +296,7 @@
     </thead>
     <tbody id="tablaClientes"></tbody>
   </table>
+
+  <button class="boton-descargar" onclick="descargarExcel()">⬇ Descargar Excel (CSV)</button>
 </body>
 </html>
